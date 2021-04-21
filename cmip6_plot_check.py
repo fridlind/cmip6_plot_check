@@ -1,11 +1,10 @@
-import xarray as xr
-import cartopy.crs as ccrs
-import matplotlib.pyplot as plt
-import numpy as np
-import glob2 as glob
-from matplotlib.backends.backend_pdf import PdfPages as pdf
 import os
 import argparse
+import xarray as xr
+import matplotlib.pyplot as plt
+import cartopy.crs as ccrs
+import glob2 as glob
+from matplotlib.backends.backend_pdf import PdfPages as pdf
 
 def main(inargs):
     """Run the program."""
@@ -14,15 +13,15 @@ def main(inargs):
 
     dir_1 = inargs.dirs[0]
     ncs_1 = glob.glob(dir_1+'/**/*.nc', recursive=True)
-    mod_1 = dir_1.split('/')[-2]
-    run_1 = dir_1.split('/')[-1]
+    mod_1 = dir_1.split('/')[-3]
+    run_1 = dir_1.split('/')[-2]
     print('First source: ', dir_1)
 
     if len(inargs.dirs)==2:
         dir_2 = inargs.dirs[1]
         ncs_2 = glob.glob(dir_2+'/**/*.nc', recursive=True)
-        mod_2 = dir_2.split('/')[-2]
-        run_2 = dir_2.split('/')[-1]
+        mod_2 = dir_2.split('/')[-3]
+        run_2 = dir_2.split('/')[-2]
         print('Second source: ', dir_2)
 
     # specify local destination for comparison plots
@@ -38,6 +37,7 @@ def main(inargs):
     pp = pdf('multipage.pdf')
 
     for i_1, f_1 in enumerate(ncs_1):
+        print(f_1)
         dat_1 = xr.open_dataset(f_1)
         var_1 = list(dat_1.data_vars.keys())[-1]
         ndims = len(dat_1[var_1].dims)
@@ -51,6 +51,9 @@ def main(inargs):
             parr = path.split(mod_1)
             title = parr[0]+mod_1+'\n'+parr[1]+'/\n'+fname+'\n'+fld_1.attrs['long_name']
             plt.title(title)
+            val_str = ("min, max, mean = "+"{:.6e}".format(fld_1.min().data)+", "
+                       "{:.6e}".format(fld_1.max().data)+", "+"{:.6e}".format(fld_1.mean().data))
+            ax.annotate(val_str,xy=(0,-0.1),xycoords='axes fraction')
             ax.coastlines()
 
             if len(inargs.dirs)==2:
@@ -69,6 +72,9 @@ def main(inargs):
                 parr = path.split(mod_2)
                 title = parr[0]+mod_2+'\n'+parr[1]+'/\n'+fname+'\n'+fld_2.attrs['long_name']
                 plt.title(title)
+                val_str = ("min, max, mean = "+"{:.6e}".format(fld_2.min().data)+", "
+                           "{:.6e}".format(fld_2.max().data)+", "+"{:.6e}".format(fld_2.mean().data))
+                ax.annotate(val_str,xy=(0,-0.1),xycoords='axes fraction')
                 ax.coastlines()
 
             pp.savefig()
@@ -84,6 +90,9 @@ def main(inargs):
             parr = path.split(mod_1)
             title = parr[0]+mod_1+'\n'+parr[1]+'/\n'+fname+'\n'+fld_1.attrs['long_name']+' (Longitude=0)'
             plt.title(title)
+            val_str = ("min, max, mean = "+"{:.6e}".format(fld_1.min().data)+", "
+                       "{:.6e}".format(fld_1.max().data)+", "+"{:.6e}".format(fld_1.mean().data))
+            ax.annotate(val_str,xy=(0,-0.25),xycoords='axes fraction')
 
             if len(inargs.dirs)==2:
                 search_str = fname.split('_')[0]+'_'+fname.split('_')[1]
@@ -101,6 +110,9 @@ def main(inargs):
                 path, fname = os.path.split(f_2)
                 parr = path.split(mod_2)
                 title = parr[0]+mod_2+'\n'+parr[1]+'/\n'+fname+'\n'+fld_2.attrs['long_name']+' (Longitude=0)'
+                val_str = ("min, max, mean = "+"{:.6e}".format(fld_2.min().data)+", "
+                           "{:.6e}".format(fld_2.max().data)+", "+"{:.6e}".format(fld_2.mean().data))
+                ax.annotate(val_str,xy=(0,-0.25),xycoords='axes fraction')
                 plt.title(title)
 
             fig.tight_layout(pad=6)
@@ -114,6 +126,7 @@ def main(inargs):
             path, fname = os.path.split(f_2)
             matching_file = [i for i in ncs_1 if fname.split('_')[0]+'_'+fname.split('_')[1] in i]
             if matching_file == []:
+                print(f_2)
                 var_2 = list(dat_2.data_vars.keys())[-1]
                 ndims = len(dat_2[var_2].dims)
                 if ndims==3:
@@ -126,6 +139,9 @@ def main(inargs):
                     parr = path.split(mod_2)
                     title = parr[0]+mod_2+'\n'+parr[1]+'/\n'+fname+'\n'+fld_2.attrs['long_name']
                     plt.title(title)
+                    val_str = ("min, max, mean = "+"{:.6e}".format(fld_2.min().data)+", "
+                            "{:.6e}".format(fld_2.max().data)+", "+"{:.6e}".format(fld_2.mean().data))
+                    ax.annotate(val_str,xy=(0,-0.1),xycoords='axes fraction')
                     ax.coastlines()
                     pp.savefig()
                 elif ndims==4:
@@ -139,6 +155,9 @@ def main(inargs):
                     parr = path.split(mod_2)
                     title = parr[0]+mod_2+'\n'+parr[1]+'/\n'+fname+'\n'+fld_2.attrs['long_name']+' (Longitude=0)'
                     plt.title(title)
+                    val_str = ("min, max, mean = "+"{:.6e}".format(fld_2.min().data)+", "
+                            "{:.6e}".format(fld_2.max().data)+", "+"{:.6e}".format(fld_2.mean().data))
+                    ax.annotate(val_str,xy=(0,-0.25),xycoords='axes fraction')
                     fig.tight_layout(pad=6)
                     pp.savefig()
                 plt.close()
