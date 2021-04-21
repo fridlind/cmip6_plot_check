@@ -12,18 +12,34 @@ def main(inargs):
     # specify source files from two model runs
 
     dir_1 = inargs.dirs[0]
-    ncs_1 = glob.glob(dir_1+'/**/*.nc', recursive=True)
+    print('First source: ', dir_1)
     mod_1 = dir_1.split('/')[-3]
     run_1 = dir_1.split('/')[-2]
-    print('First source: ', dir_1)
+    dir_1_var = glob.glob(dir_1+'/*/*/*/*', recursive=True) # all reported variables
+    ncs_1 = []
+    for i_1, d_1 in enumerate(dir_1_var):
+        f_all = sorted(glob.glob(dir_1_var[i_1]+'/*/*.nc', recursive=True))
+        if f_all != []:
+            if inargs.first:
+                ncs_1.append(f_all[0])
+            else:
+                ncs_1.append(f_all[-1])
 
     if len(inargs.dirs)==2:
         dir_2 = inargs.dirs[1]
-        ncs_2 = glob.glob(dir_2+'/**/*.nc', recursive=True)
+        print('Second source: ', dir_2)
         mod_2 = dir_2.split('/')[-3]
         run_2 = dir_2.split('/')[-2]
-        print('Second source: ', dir_2)
-
+        dir_2_var = glob.glob(dir_2+'/*/*/*/*', recursive=True) # all reported variables
+        ncs_2 = []
+        for i_2, d_2 in enumerate(dir_2_var):
+            f_all = sorted(glob.glob(dir_2_var[i_2]+'/*/*.nc', recursive=True))
+            if f_all != []:
+                if inargs.first:
+                    ncs_2.append(f_all[0])
+                else:
+                    ncs_2.append(f_all[-1])
+                    
     # specify local destination for comparison plots
 
     if len(inargs.dirs)==2:
@@ -33,9 +49,9 @@ def main(inargs):
 
     # loop over source files in first model run
 
-    print('Processing ...')
     pp = pdf('multipage.pdf')
 
+    print('Processing first source ...')
     for i_1, f_1 in enumerate(ncs_1):
         print(f_1)
         dat_1 = xr.open_dataset(f_1)
@@ -122,11 +138,13 @@ def main(inargs):
     # loop over source files in second model run (plot only any missing from first run)
 
     if len(inargs.dirs)==2: 
+        print('Processing second source ...')
         for i_2, f_2 in enumerate(ncs_2):
             path, fname = os.path.split(f_2)
             matching_file = [i for i in ncs_1 if fname.split('_')[0]+'_'+fname.split('_')[1] in i]
             if matching_file == []:
                 print(f_2)
+                dat_2 = xr.open_dataset(f_2)
                 var_2 = list(dat_2.data_vars.keys())[-1]
                 ndims = len(dat_2[var_2].dims)
                 if ndims==3:
@@ -173,6 +191,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=description)
     
     parser.add_argument("dirs", type=str, nargs='*', help="One or two directory names")
+    parser.add_argument("--first", action="store_true", default=False, 
+                        help="Plot first version (earliest) instead of last (latest=most recent)")
 
     args = parser.parse_args()            
 
