@@ -13,9 +13,10 @@ def main(inargs):
 
     dir_1 = inargs.dirs[0]
     print('First source: ', dir_1)
-    mod_1 = dir_1.split('/')[-3]
-    run_1 = dir_1.split('/')[-2]
-    dir_1_var = glob.glob(dir_1+'/*/*/*/*', recursive=True) # all reported variables
+    mod_1 = dir_1.split('/')[-4]
+    run_1 = dir_1.split('/')[-3]
+    sce_1 = dir_1.split('/')[-2]
+    dir_1_var = glob.glob(dir_1+'*/*/*', recursive=True) # all reported variables
     ncs_1 = []
     for i_1, d_1 in enumerate(dir_1_var):
         f_all = sorted(glob.glob(dir_1_var[i_1]+'/*/*.nc', recursive=True))
@@ -28,9 +29,10 @@ def main(inargs):
     if len(inargs.dirs)==2:
         dir_2 = inargs.dirs[1]
         print('Second source: ', dir_2)
-        mod_2 = dir_2.split('/')[-3]
-        run_2 = dir_2.split('/')[-2]
-        dir_2_var = glob.glob(dir_2+'/*/*/*/*', recursive=True) # all reported variables
+        mod_2 = dir_2.split('/')[-4]
+        run_2 = dir_2.split('/')[-3]
+        sce_2 = dir_2.split('/')[-2]
+        dir_2_var = glob.glob(dir_2+'*/*/*', recursive=True)
         ncs_2 = []
         for i_2, d_2 in enumerate(dir_2_var):
             f_all = sorted(glob.glob(dir_2_var[i_2]+'/*/*.nc', recursive=True))
@@ -43,9 +45,9 @@ def main(inargs):
     # specify local destination for comparison plots
 
     if len(inargs.dirs)==2:
-        out_pdf = mod_1+'_'+run_1+'_vs_'+mod_2+'_'+run_2+'.pdf'
+        out_pdf = mod_1+'_'+run_1+'_'+sce_1+'_vs_'+mod_2+'_'+run_2+'_'+sce_2+'.pdf'
     else:
-        out_pdf = mod_1+'_'+run_1+'.pdf'
+        out_pdf = mod_1+'_'+run_1+'_'+sce_1+'.pdf'
 
     # loop over source files in first model run
 
