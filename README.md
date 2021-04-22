@@ -1,7 +1,7 @@
 # cmip6_plot_check
 
 Usage example on Discover:
-> module load  
+> module load python/GEOSpyD/Ana2019.10_py3.7  
 > ipython  
 > run cmip6_plot_check.py /discover/nobackup/aackerma/cmip6_postprocess/CMIP6/CMIP/NASA-GISS/GISS-E2-G/amip/ /discover/nobackup/aackerma/cmip6_postprocess/CMIP6/CMIP/NASA-GISS/GISS-E3-G/amip/ --first  
 
