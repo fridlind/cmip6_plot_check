@@ -1,9 +1,9 @@
 # cmip6_plot_check
 
 Usage example on Discover:
-> module load 
-> ipython
-> run cmip6_plot_check.py /discover/nobackup/aackerma/cmip6_postprocess/CMIP6/CMIP/NASA-GISS/GISS-E2-G/amip/ /discover/nobackup/aackerma/cmip6_postprocess/CMIP6/CMIP/NASA-GISS/GISS-E3-G/amip/ --first
+> module load  
+> ipython  
+> run cmip6_plot_check.py /discover/nobackup/aackerma/cmip6_postprocess/CMIP6/CMIP/NASA-GISS/GISS-E2-G/amip/ /discover/nobackup/aackerma/cmip6_postprocess/CMIP6/CMIP/NASA-GISS/GISS-E3-G/amip/ --first  
 
 Output:
 ./GISS-E2-G_amip_vs_GISS-E3-G2_amip.pdf
