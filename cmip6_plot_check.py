@@ -97,14 +97,19 @@ def main(inargs):
         elif ndims==4:
             fig = plt.figure(figsize=[8.5,11])
             ax = fig.add_subplot(211)
-            fld_1 = dat_1[var_1].isel(time=0,lon=0)
-            fld_1.plot(ax=ax,
-                       cbar_kwargs={'label': fld_1.units},rasterized=True)
+            if dat_1[var_1].dims[1]=='basin':
+                fld_1 = dat_1[var_1].isel(time=0,basin=0)
+                subtit = '(basin=0)'
+            else:
+                fld_1 = dat_1[var_1].isel(time=0,lon=0)
+                subtit = '(lon=0)'
+            fld_1.plot(ax=ax,cbar_kwargs={'label': fld_1.units},rasterized=True)
             if dat_1[var_1].dims[1]==('lev') or dat_1[var_1].dims[1]==('plev'): ax.invert_yaxis()
+            if dat_1[var_1].dims[2]==('lev'): ax.invert_yaxis() # ocean basin case
             title = fld_1.attrs['long_name'] + ' (Longitude=0)'
             path, fname = os.path.split(f_1)
             parr = path.split(mod_1)
-            title = parr[0]+mod_1+'\n'+parr[1]+'/\n'+fname+'\n'+fld_1.attrs['long_name']+' (Longitude=0)'
+            title = parr[0]+mod_1+'\n'+parr[1]+'/\n'+fname+'\n'+fld_1.attrs['long_name']+subtit
             plt.title(title)
             val_str = ("min, max, mean = "+"{:.6e}".format(fld_1.min().data)+", "
                        "{:.6e}".format(fld_1.max().data)+", "+"{:.6e}".format(fld_1.mean().data))
@@ -123,9 +128,10 @@ def main(inargs):
                 fld_2.plot(ax=ax,
                        cbar_kwargs={'label': fld_2.units},rasterized=True)
                 if dat_2[var_2].dims[1]==('lev') or dat_2[var_2].dims[1]==('plev'): ax.invert_yaxis()
+                if dat_1[var_1].dims[2]==('lev'): ax.invert_yaxis() # ocean basin case
                 path, fname = os.path.split(f_2)
                 parr = path.split(mod_2)
-                title = parr[0]+mod_2+'\n'+parr[1]+'/\n'+fname+'\n'+fld_2.attrs['long_name']+' (Longitude=0)'
+                title = parr[0]+mod_2+'\n'+parr[1]+'/\n'+fname+'\n'+fld_2.attrs['long_name']+subtit
                 val_str = ("min, max, mean = "+"{:.6e}".format(fld_2.min().data)+", "
                            "{:.6e}".format(fld_2.max().data)+", "+"{:.6e}".format(fld_2.mean().data))
                 ax.annotate(val_str,xy=(0,-0.25),xycoords='axes fraction')
@@ -165,13 +171,18 @@ def main(inargs):
                 elif ndims==4:
                     fig = plt.figure(figsize=[8.5,11])
                     ax = fig.add_subplot(212)
-                    fld_2 = dat_2[var_2].isel(time=0,lon=0)
+                    if dat_2[var_2].dims[1]=='basin':
+                        fld_2 = dat_2[var_2].isel(time=0,basin=0)
+                        subtit = '(basin=0)'
+                    else:
+                        fld_2 = dat_2[var_2].isel(time=0,lon=0)
+                        subtit = '(lon=0)'
                     fld_2.plot(ax=ax,cbar_kwargs={'label': fld_2.units},rasterized=True)
                     if dat_2[var_2].dims[1]==('lev') or dat_2[var_2].dims[1]==('plev'): ax.invert_yaxis()
-                    title = fld_1.attrs['long_name'] + ' (Longitude=0)'
+                    if dat_2[var_2].dims[2]==('lev'): ax.invert_yaxis() # ocean basin case
                     path, fname = os.path.split(f_2)
                     parr = path.split(mod_2)
-                    title = parr[0]+mod_2+'\n'+parr[1]+'/\n'+fname+'\n'+fld_2.attrs['long_name']+' (Longitude=0)'
+                    title = parr[0]+mod_2+'\n'+parr[1]+'/\n'+fname+'\n'+fld_2.attrs['long_name']+subtit
                     plt.title(title)
                     val_str = ("min, max, mean = "+"{:.6e}".format(fld_2.min().data)+", "
                             "{:.6e}".format(fld_2.max().data)+", "+"{:.6e}".format(fld_2.mean().data))
