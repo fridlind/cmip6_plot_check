@@ -1,4 +1,5 @@
 import os
+import sys
 import argparse
 import xarray as xr
 import matplotlib.pyplot as plt
@@ -8,6 +9,13 @@ from matplotlib.backends.backend_pdf import PdfPages as pdf
 
 def main(inargs):
     """Run the program."""
+    
+    # identify year and month to plot
+    
+    plot_time = inargs.time
+    if len(plot_time) != 7:
+        print('INPUT ERROR: First argument must be date in XXXX-XX format.')
+        sys.exit() # abort
 
     # specify source files from two model runs
 
@@ -25,6 +33,12 @@ def main(inargs):
                 ncs_1.append(f_all[0])
             else:
                 ncs_1.append(f_all[-1])
+    try:
+        dat_1 = xr.open_dataset(ncs_1[0]).sel(time=plot_time)
+    except:
+        print('DATA ERROR: First directory output is missing specified year and month.')
+        sys.exit() # abort
+        
 
     if len(inargs.dirs)==2:
         dir_2 = inargs.dirs[1]
@@ -41,6 +55,11 @@ def main(inargs):
                     ncs_2.append(f_all[0])
                 else:
                     ncs_2.append(f_all[-1])
+        try:
+            dat_2 = xr.open_dataset(ncs_2[0]).sel(time=plot_time)
+        except:
+            print('DATA ERROR: Second directory output is missing specified year and month.')
+            sys.exit() # abort
                     
     # specify local destination for comparison plots
 
@@ -56,13 +75,13 @@ def main(inargs):
     print('Processing first source ...')
     for i_1, f_1 in enumerate(ncs_1):
         print(f_1)
-        dat_1 = xr.open_dataset(f_1)
+        dat_1 = xr.open_dataset(f_1).sel(time=plot_time)
         var_1 = list(dat_1.data_vars.keys())[-1]
         ndims = len(dat_1[var_1].dims)
         if ndims==3:
             fig = plt.figure(figsize=[8.5,11])
             ax = fig.add_subplot(211,projection=ccrs.PlateCarree(central_longitude=180))
-            fld_1 = dat_1[var_1].isel(time=0)
+            fld_1 = dat_1[var_1]
             fld_1.plot(ax=ax,transform=ccrs.PlateCarree(),
                        cbar_kwargs={'label': fld_1.units},rasterized=True)
             path, fname = os.path.split(f_1)
@@ -80,10 +99,10 @@ def main(inargs):
             else: matching_file = []
             if matching_file != []:
                 f_2 = matching_file[0]
-                dat_2 = xr.open_dataset(f_2)
+                dat_2 = xr.open_dataset(f_2).sel(time=plot_time)
                 var_2 = list(dat_2.data_vars.keys())[-1]
                 ax = fig.add_subplot(212,projection=ccrs.PlateCarree(central_longitude=180))
-                fld_2 = dat_2[var_2].isel(time=0)
+                fld_2 = dat_2[var_2]
                 fld_2.plot(ax=ax,transform=ccrs.PlateCarree(),
                        cbar_kwargs={'label': fld_2.units},rasterized=True)
                 path, fname = os.path.split(f_2)
@@ -100,11 +119,11 @@ def main(inargs):
             fig = plt.figure(figsize=[8.5,11])
             ax = fig.add_subplot(211)
             if dat_1[var_1].dims[1]=='basin':
-                fld_1 = dat_1[var_1].isel(time=0,basin=0)
-                subtit = '(basin=0)'
+                fld_1 = dat_1[var_1].isel(basin=0)
+                subtit = ' (basin=0)'
             else:
-                fld_1 = dat_1[var_1].isel(time=0,lon=0)
-                subtit = '(lon=0)'
+                fld_1 = dat_1[var_1].isel(lon=0)
+                subtit = ' (lon=0)'
             fld_1.plot(ax=ax,cbar_kwargs={'label': fld_1.units},rasterized=True)
             if dat_1[var_1].dims[1]==('lev') or dat_1[var_1].dims[1]==('plev'): ax.invert_yaxis()
             if dat_1[var_1].dims[2]==('lev'): ax.invert_yaxis() # ocean basin case
@@ -123,10 +142,10 @@ def main(inargs):
             else: matching_file = []
             if matching_file != []:
                 f_2 = matching_file[0]
-                dat_2 = xr.open_dataset(f_2)
+                dat_2 = xr.open_dataset(f_2).sel(time=plot_time)
                 var_2 = list(dat_2.data_vars.keys())[-1]
                 ax = fig.add_subplot(212)
-                fld_2 = dat_2[var_2].isel(time=0,lon=0)
+                fld_2 = dat_2[var_2].isel(lon=0)
                 fld_2.plot(ax=ax,
                        cbar_kwargs={'label': fld_2.units},rasterized=True)
                 if dat_2[var_2].dims[1]==('lev') or dat_2[var_2].dims[1]==('plev'): ax.invert_yaxis()
@@ -152,13 +171,13 @@ def main(inargs):
             matching_file = [i for i in ncs_1 if fname.split('_')[0]+'_'+fname.split('_')[1] in i]
             if matching_file == []:
                 print(f_2)
-                dat_2 = xr.open_dataset(f_2)
+                dat_2 = xr.open_dataset(f_2).sel(time=plot_time)
                 var_2 = list(dat_2.data_vars.keys())[-1]
                 ndims = len(dat_2[var_2].dims)
                 if ndims==3:
                     fig = plt.figure(figsize=[8.5,11])
                     ax = fig.add_subplot(212,projection=ccrs.PlateCarree(central_longitude=180))
-                    fld_2 = dat_2[var_2].isel(time=0)
+                    fld_2 = dat_2[var_2]
                     fld_2.plot(ax=ax,transform=ccrs.PlateCarree(),
                     cbar_kwargs={'label': fld_2.units},rasterized=True)
                     path, fname = os.path.split(f_2)
@@ -174,11 +193,11 @@ def main(inargs):
                     fig = plt.figure(figsize=[8.5,11])
                     ax = fig.add_subplot(212)
                     if dat_2[var_2].dims[1]=='basin':
-                        fld_2 = dat_2[var_2].isel(time=0,basin=0)
-                        subtit = '(basin=0)'
+                        fld_2 = dat_2[var_2].isel(basin=0)
+                        subtit = ' (basin=0)'
                     else:
-                        fld_2 = dat_2[var_2].isel(time=0,lon=0)
-                        subtit = '(lon=0)'
+                        fld_2 = dat_2[var_2].isel(lon=0)
+                        subtit = ' (lon=0)'
                     fld_2.plot(ax=ax,cbar_kwargs={'label': fld_2.units},rasterized=True)
                     if dat_2[var_2].dims[1]==('lev') or dat_2[var_2].dims[1]==('plev'): ax.invert_yaxis()
                     if dat_2[var_2].dims[2]==('lev'): ax.invert_yaxis() # ocean basin case
@@ -200,9 +219,10 @@ def main(inargs):
 
 if __name__ == '__main__':
 
-    description='Print the input arguments to the screen.'
+    description='Plot specified month and year from all CMIP6 variables submitted.'
     parser = argparse.ArgumentParser(description=description)
-    
+
+    parser.add_argument("time", type=str, help="Year and month to plot [XXXX-XX]")
     parser.add_argument("dirs", type=str, nargs='*', help="One or two directory names")
     parser.add_argument("--first", action="store_true", default=False, 
                         help="Plot first version (earliest) instead of last (latest=most recent)")
