@@ -37,6 +37,7 @@ def main(inargs):
         dat_1 = xr.open_dataset(ncs_1[0]).sel(time=plot_time)
     except:
         print('DATA ERROR: First directory output is missing specified year and month.')
+        print(ncs_1[0])
         sys.exit() # abort if date and month are not found
 
     # optionally specify source files from a second model run
