@@ -60,6 +60,7 @@ def main(inargs):
             dat_2 = xr.open_dataset(ncs_2[0]).sel(time=plot_time)
         except:
             print('DATA ERROR: Second directory output is missing specified year and month.')
+            print(ncs_2[0])
             sys.exit()
                     
     # specify local destination for output comparison plots
