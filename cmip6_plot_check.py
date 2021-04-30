@@ -204,7 +204,9 @@ def main(inargs):
 
             fig.tight_layout(pad=6)
             pp.savefig()
-            
+        
+        if i_1==2:
+            break
         plt.close() # clear matplotlib for next page (to avoid overflows)
 
     # loop over source files in second model run (plot only any missing from first run)
@@ -270,8 +272,8 @@ def main(inargs):
                     ax.annotate(plot_time+' '+val_str,xy=(0,-0.2),xycoords='axes fraction')
                     fig.tight_layout(pad=6)
                     pp.savefig()
-
-                plt.close()
+                if i_2==2:
+                    break
 
     pp.close() # multipage document complete
     os.popen('mv multipage.pdf '+out_pdf) # save document to descriptive file name
