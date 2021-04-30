@@ -222,7 +222,7 @@ def main(inargs):
                 if ndims==3:
                     fig = plt.figure(figsize=[8.5,11])
                     ax = fig.add_subplot(212,projection=ccrs.PlateCarree(central_longitude=180))
-                    fld_2 = dat_2[var_2]
+                    fld_2 = dat_2[var_2].isel(time=0)
                     fld_2.plot(ax=ax,transform=ccrs.PlateCarree(),
                     cbar_kwargs={'label': fld_2.units},rasterized=True)
                     path, fname = os.path.split(f_2)
@@ -238,10 +238,10 @@ def main(inargs):
                     fig = plt.figure(figsize=[8.5,11])
                     ax = fig.add_subplot(212)
                     if dat_2[var_2].dims[1]=='basin':
-                        fld_2 = dat_2[var_2].isel(basin=0)
+                        fld_2 = dat_2[var_2].isel(basin=0,time=0)
                         subtit = ' (basin=0)'
                     else:
-                        fld_2 = dat_2[var_2].isel(lon=0)
+                        fld_2 = dat_2[var_2].isel(lon=0,time=0)
                         subtit = ' (lon=0)'
                     fld_2.plot(ax=ax,cbar_kwargs={'label': fld_2.units},rasterized=True)
                     if dat_2[var_2].dims[1]==('lev') or dat_2[var_2].dims[1]==('plev'): ax.invert_yaxis()
@@ -258,7 +258,7 @@ def main(inargs):
                 else:
                     fig = plt.figure(figsize=[8.5,11])
                     ax = fig.add_subplot(211)
-                    fld_2 = dat_1[var_2].isel(lat=0,lon=0,time=0)
+                    fld_2 = dat_2[var_2].isel(lat=0,lon=0,time=0)
                     subtit = ' (Lat/Lon=0/0)'
                     fld_2.plot(ax=ax,cbar_kwargs={'label': fld_2.units},rasterized=True)
                     path, fname = os.path.split(f_2)
