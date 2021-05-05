@@ -25,12 +25,13 @@ def main(inargs):
     dir_1_var = [i for i in dir_1_var if 'fx' not in i]  # ignore *fx/ variables
     ncs_1 = []
     for i_1, d_1 in enumerate(dir_1_var):
-        f_all = sorted(glob.glob(dir_1_var[i_1]+'/*/*.nc', recursive=True))
-        if f_all != []:
+        v_all = sorted(glob.glob(dir_1_var[i_1]+'/*', recursive=True)) # all versions
+        if v_all != []:
             if inargs.first: # optionally use first version in the output
-                ncs_1.append(f_all[0])
+                f_all = sorted(glob.glob(v_all[0]+'/*.nc')) # all files in first version
             else: # otherwise use default last (most recent version)
-                ncs_1.append(f_all[-1])
+                f_all = sorted(glob.glob(v_all[-1]+'/*.nc'))
+            ncs_1.append(f_all[-1]) # hack: assume dates in 2001-2014 (last file in dir)
     try: # make sure that year and month output exist
         dat_1 = xr.open_dataset(ncs_1[0]).sel(time=tim_1)
     except:
@@ -54,12 +55,13 @@ def main(inargs):
         dir_2_var = [i for i in dir_2_var if 'fx' not in i]
         ncs_2 = []
         for i_2, d_2 in enumerate(dir_2_var):
-            f_all = sorted(glob.glob(dir_2_var[i_2]+'/*/*.nc', recursive=True))
-            if f_all != []:
+            v_all = sorted(glob.glob(dir_2_var[i_2]+'/*', recursive=True))
+            if v_all != []:
                 if inargs.first:
-                    ncs_2.append(f_all[0])
+                    f_all = sorted(glob.glob(v_all[0]+'/*.nc'))
                 else:
-                    ncs_2.append(f_all[-1])
+                    f_all = sorted(glob.glob(v_all[-1]+'/*.nc'))
+                ncs_2.append(f_all[-1])
         try:
             dat_2 = xr.open_dataset(ncs_2[0]).sel(time=tim_2)
         except:
