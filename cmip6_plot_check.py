@@ -25,7 +25,7 @@ def main(inargs):
     dir_1_var = [i for i in dir_1_var if 'fx' not in i]  # ignore *fx/ variables
     ncs_1 = []
     for i_1, d_1 in enumerate(dir_1_var):
-        f_all = sorted(glob.glob(dir_1_var[i_1]+'/*/*/*.nc', recursive=True))
+        f_all = sorted(glob.glob(dir_1_var[i_1]+'/*/*.nc', recursive=True))
         if f_all != []:
             if inargs.first: # optionally use first version in the output
                 ncs_1.append(f_all[0])
@@ -54,7 +54,7 @@ def main(inargs):
         dir_2_var = [i for i in dir_2_var if 'fx' not in i]
         ncs_2 = []
         for i_2, d_2 in enumerate(dir_2_var):
-            f_all = sorted(glob.glob(dir_2_var[i_2]+'/*/*/*.nc', recursive=True))
+            f_all = sorted(glob.glob(dir_2_var[i_2]+'/*/*.nc', recursive=True))
             if f_all != []:
                 if inargs.first:
                     ncs_2.append(f_all[0])
