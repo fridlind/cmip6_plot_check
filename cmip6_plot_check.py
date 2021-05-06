@@ -167,11 +167,15 @@ def main(inargs):
                 dat_2 = xr.open_dataset(f_2).sel(time=tim_2)
                 var_2 = list(dat_2.data_vars.keys())[-1]
                 ax = fig.add_subplot(212)
-                fld_2 = dat_2[var_2].isel(lon=0,time=0)
-                fld_2.plot(ax=ax,
-                       cbar_kwargs={'label': fld_2.units},rasterized=True)
+                if dat_2[var_2].dims[1]=='basin':
+                    fld_2 = dat_2[var_2].isel(basin=0,time=0)
+                    subtit = ' (basin=0)'
+                else:
+                    fld_2 = dat_2[var_2].isel(lon=0,time=0)
+                    subtit = ' (lon=0)'
+                fld_2.plot(ax=ax,cbar_kwargs={'label': fld_2.units},rasterized=True)
                 if dat_2[var_2].dims[1]==('lev') or dat_2[var_2].dims[1]==('plev'): ax.invert_yaxis()
-                if dat_1[var_1].dims[2]==('lev'): ax.invert_yaxis() # ocean basin case
+                if dat_2[var_2].dims[2]==('lev'): ax.invert_yaxis() # ocean basin case
                 path, fname = os.path.split(f_2)
                 parr = path.split(mod_2)
                 title = parr[0]+mod_2+'\n'+parr[1]+'/\n'+fname+'\n'+fld_2.attrs['long_name']+subtit
