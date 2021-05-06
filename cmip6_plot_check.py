@@ -31,7 +31,10 @@ def main(inargs):
                 f_all = sorted(glob.glob(v_all[0]+'/*.nc')) # all files in first version
             else: # otherwise use default last (most recent version)
                 f_all = sorted(glob.glob(v_all[-1]+'/*.nc'))
-            ncs_1.append(f_all[-1]) # hack: assume dates in 2001-2014 (last file in dir)
+            f_tim = [i for i in f_all if '200101-201412' in i]
+            if f_tim == []:
+                f_tim = [i for i in f_all if tim_1.replace('-','') in i]
+            ncs_1.append(f_tim[0])
     try: # make sure that year and month output exist
         dat_1 = xr.open_dataset(ncs_1[0]).sel(time=tim_1)
     except:
@@ -61,6 +64,9 @@ def main(inargs):
                     f_all = sorted(glob.glob(v_all[0]+'/*.nc'))
                 else:
                     f_all = sorted(glob.glob(v_all[-1]+'/*.nc'))
+                f_tim = [i for i in f_all if '200101-201412' in i]
+                if f_tim == []:
+                    f_tim = [i for i in f_all if tim_1.replace('-','') in i]
                 ncs_2.append(f_all[-1])
         try:
             dat_2 = xr.open_dataset(ncs_2[0]).sel(time=tim_2)
