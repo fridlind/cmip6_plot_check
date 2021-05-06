@@ -43,11 +43,11 @@ def main(inargs):
 
     if inargs.compare:
         dir_2 = inargs.dir_2
-        try:
+        if inargs.mon_2 != None:
             tim_2 = inargs.mon_2 # optional different year and month from second run
-        except:
+        else:
             tim_2 = tim_1 # or same year and month from second run
-        print('Second source: ', dir_2)
+        print('Second source: ', dir_2, tim_2)
         mod_2 = dir_2.split('/')[-4]
         run_2 = dir_2.split('/')[-3]
         sce_2 = dir_2.split('/')[-2]
