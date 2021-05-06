@@ -34,6 +34,8 @@ def main(inargs):
             f_tim = [i for i in f_all if '200101-201412' in i]
             if f_tim == []:
                 f_tim = [i for i in f_all if tim_1.replace('-','') in i]
+            if f_tim == []:
+                f_tim = f_all[-1] # if all else fails, just take the last file
             ncs_1.append(f_tim[0])
     try: # make sure that year and month output exist
         dat_1 = xr.open_dataset(ncs_1[0]).sel(time=tim_1)
@@ -67,6 +69,8 @@ def main(inargs):
                 f_tim = [i for i in f_all if '200101-201412' in i]
                 if f_tim == []:
                     f_tim = [i for i in f_all if tim_1.replace('-','') in i]
+                if f_tim == []:
+                    f_tim = f_all[-1] # if all else fails, just take the last file
                 ncs_2.append(f_all[-1])
         try:
             dat_2 = xr.open_dataset(ncs_2[0]).sel(time=tim_2)
