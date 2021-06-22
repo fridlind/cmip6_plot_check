@@ -71,6 +71,20 @@ def main(inargs):
         sce_2 = dir_2.split('/')[-2]
         dir_2_var = glob.glob(dir_2+'*/*/*', recursive=True)
         dir_2_var = [i for i in dir_2_var if 'fx' not in i]
+        if inargs.include != None:
+            for i_2, d_2 in enumerate(inargs.include.split(',')): # iterate over comma-separated list
+                dir_2_var = [i for i in dir_2_var if d_2 in i] # include only specified variable(s)
+            if dir_2_var == []:
+                print('DATA ERROR: Second directory output is missing specified variable(s).')
+                print(inargs.include)
+                sys.exit()
+        elif inargs.exclude != None:
+            for i_2, d_2 in enumerate(inargs.exclude.split(',')): # iterate over comma-separated list
+                dir_2_var = [i for i in dir_2_var if d_2 not in i] # exclude specified variable(s)
+            if dir_2_var == []:
+                print('DATA ERROR: Second directory output is empty beyond excluded variable(s).')
+                print(inargs.exclude)
+                sys.exit()
         ncs_2 = []
         for i_2, d_2 in enumerate(dir_2_var):
             v_all = sorted(glob.glob(dir_2_var[i_2]+'/*', recursive=True))
