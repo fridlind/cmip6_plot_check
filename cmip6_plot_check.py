@@ -107,7 +107,10 @@ def main(inargs):
             val_str = ("value = "+"{:.5e}".format(fld_1.data))
             ax.annotate(tim_1+' '+val_str,xy=(0,-0.1),xycoords='axes fraction')
 
-            matching_file = [i for i in ncs_2 if fname.split('_')[0]+'_'+fname.split('_')[1] in i]
+            if inargs.compare: # optionally search for matching variable in second directory
+                search_str = fname.split('_')[0]+'_'+fname.split('_')[1]
+                matching_file = [i for i in ncs_2 if search_str in i]
+            else: matching_file = []
             if matching_file != []:
                 f_2 = matching_file[0]
                 print(f_2)
