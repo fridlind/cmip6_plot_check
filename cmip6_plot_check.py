@@ -94,7 +94,37 @@ def main(inargs):
         dat_1 = xr.open_dataset(f_1).sel(time=tim_1) # read the target time from each file
         var_1 = list(dat_1.data_vars.keys())[-1] # identify the variable name
         ndims = len(dat_1[var_1].dims) # determine dimensionality (includes time)
-        if ndims==3: # data is lat/lon (simplest case)
+        if ndims==1: # data is a scalar (dummy plot)
+            fig = plt.figure(figsize=[8.5,11])
+            ax = fig.add_subplot(211)
+            fld_1 = dat_1[var_1].isel(time=0) # scalar value
+            ax.annotate('SCALAR VALUE',xy=(0.4,0.5),xycoords='axes fraction')
+            path, fname = os.path.split(f_1)
+            parr = path.split(mod_1)
+            title = parr[0]+mod_1+'\n'+parr[1]+'/\n'+fname+'\n'+fld_1.attrs['long_name']
+            # parse directory name for title
+            plt.title(title)
+            val_str = ("value = "+"{:.5e}".format(fld_1.data))
+            ax.annotate(tim_1+' '+val_str,xy=(0,-0.1),xycoords='axes fraction')
+
+            matching_file = [i for i in ncs_2 if fname.split('_')[0]+'_'+fname.split('_')[1] in i]
+            if matching_file != []:
+                f_2 = matching_file[0]
+                print(f_2)
+                dat_2 = xr.open_dataset(f_2)
+                var_2 = list(dat_2.data_vars.keys())[-1]
+                ax = fig.add_subplot(212)
+                fld_2 = dat_2[var_2].isel(time=0)
+                ax.annotate('SCALAR VALUE',xy=(0.4,0.5),xycoords='axes fraction')
+                path, fname = os.path.split(f_2)
+                parr = path.split(mod_2)
+                title = parr[0]+mod_2+'\n'+parr[1]+'/\n'+fname+'\n'+fld_2.attrs['long_name']
+                plt.title(title)
+                val_str = ("value = "+"{:.5e}".format(fld_2.data))
+                ax.annotate(tim_2+' '+val_str,xy=(0,-0.1),xycoords='axes fraction')
+
+            pp.savefig() # completed page
+        elif ndims==3: # data is lat/lon (simplest case to plot)
             fig = plt.figure(figsize=[8.5,11]) # initialize letter-size page
             # initialize top subplot with a mapping projection
             ax = fig.add_subplot(211,projection=ccrs.PlateCarree(central_longitude=180))
@@ -238,7 +268,19 @@ def main(inargs):
                 dat_2 = xr.open_dataset(f_2).sel(time=tim_2)
                 var_2 = list(dat_2.data_vars.keys())[-1]
                 ndims = len(dat_2[var_2].dims)
-                if ndims==3:
+                if ndims==1:
+                    fig = plt.figure(figsize=[8.5,11])
+                    ax = fig.add_subplot(212)
+                    fld_2 = dat_2[var_2].isel(time=0)
+                    ax.annotate('SCALAR VALUE',xy=(0.4,0.5),xycoords='axes fraction')
+                    path, fname = os.path.split(f_2)
+                    parr = path.split(mod_2)
+                    title = parr[0]+mod_2+'\n'+parr[1]+'/\n'+fname+'\n'+fld_2.attrs['long_name']
+                    plt.title(title)
+                    val_str = ("value = "+"{:.5e}".format(fld_2.data))
+                    ax.annotate(tim_2+' '+val_str,xy=(0,-0.1),xycoords='axes fraction')
+                    pp.savefig()
+                elif ndims==3:
                     fig = plt.figure(figsize=[8.5,11])
                     ax = fig.add_subplot(212,projection=ccrs.PlateCarree(central_longitude=180))
                     fld_2 = dat_2[var_2].isel(time=0)
