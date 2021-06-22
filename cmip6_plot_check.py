@@ -23,6 +23,20 @@ def main(inargs):
     sce_1 = dir_1.split('/')[-2]
     dir_1_var = glob.glob(dir_1+'*/*/*', recursive=True) # identify all reported variables
     dir_1_var = [i for i in dir_1_var if 'fx' not in i]  # ignore *fx/ variables
+    if inargs.include != None:
+        for i_1, d_1 in enumerate(inargs.include.split(',')): # iterate over comma-separated list
+            dir_1_var = [i for i in dir_1_var if d_1 in i] # include only specified variable(s)
+        if dir_1_var == []:
+            print('DATA ERROR: First directory output is missing specified variable(s).')
+            print(inargs.include)
+            sys.exit()
+    elif inargs.exclude != None:
+        for i_1, d_1 in enumerate(inargs.exclude.split(',')): # iterate over comma-separated list
+            dir_1_var = [i for i in dir_1_var if d_1 not in i] # exclude specified variable(s)
+        if dir_1_var == []:
+            print('DATA ERROR: First directory output is empty beyond excluded variable(s).')
+            print(inargs.exclude)
+            sys.exit()
     ncs_1 = []
     for i_1, d_1 in enumerate(dir_1_var):
         v_all = sorted(glob.glob(dir_1_var[i_1]+'/*', recursive=True)) # all versions
@@ -351,6 +365,8 @@ if __name__ == '__main__':
                         help="Compare with a second source directory?")
     parser.add_argument("--dir_2", type=str, help="Optional second source directory")
     parser.add_argument("--mon_2", type=str, help="Optional different YYYY-MM from second source")
+    parser.add_argument("--include", type=str, help="Include only these variables or classes (comma separated)")
+    parser.add_argument("--exclude", type=str, help="Exclude these variables or classes (comma separated)")
     parser.add_argument("--first", action="store_true", default=False, 
                         help="Plot first version (earliest) instead of last (latest=most recent)")
 
