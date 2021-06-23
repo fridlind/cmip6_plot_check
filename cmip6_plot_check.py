@@ -55,7 +55,7 @@ def main(inargs):
                 f_all = sorted(glob.glob(v_all[0]+'/*.nc')) # all files in first version
             else: # otherwise use default last (most recent version)
                 f_all = sorted(glob.glob(v_all[-1]+'/*.nc'))
-            f_tim = [i for i in f_all if '2014' in i]
+            f_tim = [i for i in f_all if '201412' in i]
             if f_tim == []:
                 f_tim = [i for i in f_all if tim_1.replace('-','') in i]
             if f_tim != []:
@@ -114,7 +114,7 @@ def main(inargs):
                     f_all = sorted(glob.glob(v_all[0]+'/*.nc'))
                 else:
                     f_all = sorted(glob.glob(v_all[-1]+'/*.nc'))
-                f_tim = [i for i in f_all if '2014' in i]
+                f_tim = [i for i in f_all if '201412' in i]
                 if f_tim == []:
                     f_tim = [i for i in f_all if tim_1.replace('-','') in i]
                 if f_tim != []:
