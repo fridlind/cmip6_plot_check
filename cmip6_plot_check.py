@@ -26,8 +26,9 @@ def main(inargs):
         print('INPUT ERROR: Directory specification error (no variables found).')
         print(dir_1)
         sys.exit()
-    if mod_1[0:7] == 'GISS-E2':
-        dir_1_var = [i for i in dir_1_var if 'fx' not in i]  # ignore *fx/ variables
+    if mod_1[0:7] == 'GISS-E2': # skip *fx* and *fy* variables
+        dir_1_var = [i for i in dir_1_var if 'fx' not in i]
+        dir_1_var = [i for i in dir_1_var if 'fy' not in i]
         print('WARNING: Skipping fx class from E2 owing to dimensionality error.')
     if inargs.include != None:
         dir_1_var_incl = []
@@ -83,8 +84,9 @@ def main(inargs):
             print('INPUT ERROR: Directory specification error (no variables found).')
             print(dir_2)
             sys.exit()
-        if mod_2[0:7] == 'GISS-E2':
-            dir_2_var = [i for i in dir_2_var if 'fx' not in i]  # ignore *fx/ variables
+        if mod_2[0:7] == 'GISS-E2': # skip *fx* and *fy* variables
+            dir_2_var = [i for i in dir_2_var if 'fx' not in i]
+            dir_2_var = [i for i in dir_2_var if 'fy' not in i]
             print('WARNING: Skipping fx class from E2 owing to dimensionality error.')
         dir_2_var = [i for i in dir_2_var if 'fx' not in i]
         if inargs.include != None:
