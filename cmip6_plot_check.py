@@ -22,7 +22,13 @@ def main(inargs):
     run_1 = dir_1.split('/')[-3]
     sce_1 = dir_1.split('/')[-2]
     dir_1_var = glob.glob(dir_1+'*/*/*', recursive=True) # identify all reported variables
-    dir_1_var = [i for i in dir_1_var if 'fx' not in i]  # ignore *fx/ variables
+    if dir_1_var == []:
+        print('INPUT ERROR: Directory specification error (no variables found).')
+        print(dir_1)
+        sys.exit()
+    if mod_1[0:7] == 'GISS-E2':
+        dir_1_var = [i for i in dir_1_var if 'fx' not in i]  # ignore *fx/ variables
+        print('WARNING: Skipping fx class from E2 owing to dimensionality error.')
     if inargs.include != None:
         dir_1_var_incl = []
         for i_1, d_1 in enumerate(inargs.include.split(',')): # iterate over comma-separated list
@@ -48,7 +54,7 @@ def main(inargs):
                 f_all = sorted(glob.glob(v_all[0]+'/*.nc')) # all files in first version
             else: # otherwise use default last (most recent version)
                 f_all = sorted(glob.glob(v_all[-1]+'/*.nc'))
-            f_tim = [i for i in f_all if '201412' in i]
+            f_tim = [i for i in f_all if '2014' in i]
             if f_tim == []:
                 f_tim = [i for i in f_all if tim_1.replace('-','') in i]
             if f_tim != []:
@@ -73,6 +79,13 @@ def main(inargs):
         run_2 = dir_2.split('/')[-3]
         sce_2 = dir_2.split('/')[-2]
         dir_2_var = glob.glob(dir_2+'*/*/*', recursive=True)
+        if dir_2_var == []:
+            print('INPUT ERROR: Directory specification error (no variables found).')
+            print(dir_2)
+            sys.exit()
+        if mod_2[0:7] == 'GISS-E2':
+            dir_2_var = [i for i in dir_2_var if 'fx' not in i]  # ignore *fx/ variables
+            print('WARNING: Skipping fx class from E2 owing to dimensionality error.')
         dir_2_var = [i for i in dir_2_var if 'fx' not in i]
         if inargs.include != None:
             dir_2_var_incl = []
@@ -99,7 +112,7 @@ def main(inargs):
                     f_all = sorted(glob.glob(v_all[0]+'/*.nc'))
                 else:
                     f_all = sorted(glob.glob(v_all[-1]+'/*.nc'))
-                f_tim = [i for i in f_all if '201412' in i]
+                f_tim = [i for i in f_all if '2014' in i]
                 if f_tim == []:
                     f_tim = [i for i in f_all if tim_1.replace('-','') in i]
                 if f_tim != []:
@@ -125,9 +138,10 @@ def main(inargs):
     print('Processing first source ...')
     for i_1, f_1 in enumerate(ncs_1): # loop over variables identified above
         print(f_1)
-        dat_1 = xr.open_dataset(f_1).sel(time=tim_1) # read the target time from each file
+        dat_1 = xr.open_dataset(f_1)
         var_1 = list(dat_1.data_vars.keys())[-1] # identify the variable name
-        ndims = len(dat_1[var_1].dims) # determine dimensionality (includes time)
+        ndims = len(dat_1[var_1].dims) # determine dimensionality
+        if ndims!=2: dat_1 = xr.open_dataset(f_1).sel(time=tim_1) # most fields have time
         if ndims==1: # data is a scalar (dummy plot)
             fig = plt.figure(figsize=[8.5,11])
             ax = fig.add_subplot(211)
@@ -142,7 +156,7 @@ def main(inargs):
             ax.annotate(tim_1+' '+val_str,xy=(0,-0.15),xycoords='axes fraction')
 
             if inargs.compare: # optionally search for matching variable in second directory
-                search_str = fname.split('_')[0]+'_'+fname.split('_')[1]
+                search_str = '/'+fname.split('_')[0]+'_'+fname.split('_')[1]
                 matching_file = [i for i in ncs_2 if search_str in i]
             else: matching_file = []
             if matching_file != []:
@@ -159,9 +173,48 @@ def main(inargs):
                 plt.title(title)
                 val_str = ("value = "+"{:.5e}".format(fld_2.data))
                 ax.annotate(tim_2+' '+val_str,xy=(0,-0.15),xycoords='axes fraction')
+                fig.tight_layout(pad=6)
                 
-            fig.tight_layout(pad=6)
             pp.savefig() # completed page
+        elif ndims==2:
+            fig = plt.figure(figsize=[8.5,11])
+            ax = fig.add_subplot(211,projection=ccrs.PlateCarree(central_longitude=180))
+            fld_1 = dat_1[var_1]
+            fld_1.plot(ax=ax,transform=ccrs.PlateCarree(),
+                        cbar_kwargs={'label': fld_1.units},rasterized=True)
+            ax.coastlines()
+            path, fname = os.path.split(f_1)
+            parr = path.split(mod_1)
+            title = parr[0]+mod_1+'\n'+parr[1]+'/\n'+fname+'\n'+fld_1.attrs['long_name']
+            plt.title(title)
+            val_str = ("min, max, avg = "+"{:.5e}".format(fld_1.min().data)+", "
+                "{:.5e}".format(fld_1.max().data)+", "+"{:.5e}".format(fld_1.mean().data))
+            ax.annotate(tim_1+' '+val_str,xy=(0,-0.25),xycoords='axes fraction')
+
+            if inargs.compare: # optionally search for matching variable in second directory
+                search_str = '/'+fname.split('_')[0]+'_'+fname.split('_')[1]
+                matching_file = [i for i in ncs_2 if search_str in i]
+            else: matching_file = []
+            if matching_file != []:
+                f_2 = matching_file[0]
+                print(f_2)
+                dat_2 = xr.open_dataset(f_2)
+                var_2 = list(dat_2.data_vars.keys())[-1]
+                ax = fig.add_subplot(212,projection=ccrs.PlateCarree(central_longitude=180))
+                fld_2 = dat_2[var_2]
+                fld_2.plot(ax=ax,transform=ccrs.PlateCarree(),
+                           cbar_kwargs={'label': fld_2.units},rasterized=True)
+                ax.coastlines()
+                path, fname = os.path.split(f_2)
+                parr = path.split(mod_2)
+                title = parr[0]+mod_2+'\n'+parr[1]+'/\n'+fname+'\n'+fld_2.attrs['long_name']
+                plt.title(title)
+                val_str = ("min, max, mean = "+"{:.5e}".format(fld_2.min().data)+", "
+                    "{:.5e}".format(fld_2.max().data)+", "+"{:.5e}".format(fld_2.mean().data))
+                ax.annotate(tim_2+' '+val_str,xy=(0,-0.25),xycoords='axes fraction')
+                fig.tight_layout(pad=6)
+
+            pp.savefig()
         elif ndims==3: # data is lat/lon (simplest case to plot)
             fig = plt.figure(figsize=[8.5,11]) # initialize letter-size page         
             if dat_1[var_1].dims[1]=='basin':
@@ -190,7 +243,7 @@ def main(inargs):
             ax.annotate(tim_1+' '+val_str,xy=(0,-0.25),xycoords='axes fraction')
 
             if inargs.compare: # optionally search for matching variable in second directory
-                search_str = fname.split('_')[0]+'_'+fname.split('_')[1]
+                search_str = '/'+fname.split('_')[0]+'_'+fname.split('_')[1]
                 matching_file = [i for i in ncs_2 if search_str in i]
             else: matching_file = []
             if matching_file != []: # if it exists, execute same procedure for matching data
@@ -217,8 +270,8 @@ def main(inargs):
                 val_str = ("min, max, mean = "+"{:.5e}".format(fld_2.min().data)+", "
                            "{:.5e}".format(fld_2.max().data)+", "+"{:.5e}".format(fld_2.mean().data))
                 ax.annotate(tim_2+' '+val_str,xy=(0,-0.25),xycoords='axes fraction')
-                
-            fig.tight_layout(pad=6)
+                fig.tight_layout(pad=6)
+
             pp.savefig() # completed page
         elif ndims==4: # narrow down to either one basin or longitude for plotting
             fig = plt.figure(figsize=[8.5,11])
@@ -241,7 +294,7 @@ def main(inargs):
             ax.annotate(tim_1+' '+val_str,xy=(0,-0.25),xycoords='axes fraction')
 
             if inargs.compare:
-                search_str = fname.split('_')[0]+'_'+fname.split('_')[1]
+                search_str = '/'+fname.split('_')[0]+'_'+fname.split('_')[1]
                 matching_file = [i for i in ncs_2 if search_str in i]
             else: matching_file = []
             if matching_file != []:
@@ -266,8 +319,8 @@ def main(inargs):
                            "{:.5e}".format(fld_2.max().data)+", "+"{:.5e}".format(fld_2.mean().data))
                 ax.annotate(tim_2+' '+val_str,xy=(0,-0.25),xycoords='axes fraction')
                 plt.title(title)
-
-            fig.tight_layout(pad=6)
+                fig.tight_layout(pad=6)
+                
             pp.savefig()
         else: # more than 4 dimensions: also choose a latitude
             fig = plt.figure(figsize=[8.5,11])
@@ -284,7 +337,7 @@ def main(inargs):
             ax.annotate(tim_1+' '+val_str,xy=(0,-0.2),xycoords='axes fraction')
 
             if inargs.compare:
-                search_str = fname.split('_')[0]+'_'+fname.split('_')[1]
+                search_str = '/'+fname.split('_')[0]+'_'+fname.split('_')[1]
                 matching_file = [i for i in ncs_2 if search_str in i]
             else: matching_file = []
             if matching_file != []:
@@ -303,8 +356,8 @@ def main(inargs):
                     "{:.5e}".format(fld_2.max().data)+", "+"{:.5e}".format(fld_2.mean().data))
                 ax.annotate(tim_2+' '+val_str,xy=(0,-0.2),xycoords='axes fraction')
                 plt.title(title)
-
-            fig.tight_layout(pad=6)
+                fig.tight_layout(pad=6)
+                
             pp.savefig()
         
         plt.close() # clear matplotlib for next page (to avoid overflows)
@@ -318,9 +371,10 @@ def main(inargs):
             matching_file = [i for i in ncs_1 if fname.split('_')[0]+'_'+fname.split('_')[1] in i]
             if matching_file == []:
                 print(f_2)
-                dat_2 = xr.open_dataset(f_2).sel(time=tim_2)
+                dat_2 = xr.open_dataset(f_2)
                 var_2 = list(dat_2.data_vars.keys())[-1]
                 ndims = len(dat_2[var_2].dims)
+                if ndims!=2: dat_2 = xr.open_dataset(f_2).sel(time=tim_2) # usually time is a dimension
                 if ndims==1:
                     fig = plt.figure(figsize=[8.5,11])
                     ax = fig.add_subplot(212)
@@ -332,7 +386,22 @@ def main(inargs):
                     plt.title(title)
                     val_str = ("value = "+"{:.5e}".format(fld_2.data))
                     ax.annotate(tim_2+' '+val_str,xy=(0,-0.15),xycoords='axes fraction')
-                    fig.tight_layout(pad=6)
+                    pp.savefig()
+                elif ndims==2:
+                    fig = plt.figure(figsize=[8.5,11])
+                    ax = fig.add_subplot(212,projection=ccrs.PlateCarree(central_longitude=180))
+                    fld_2 = dat_2[var_2]
+                    fld_2.plot(ax=ax,transform=ccrs.PlateCarree(),
+                               cbar_kwargs={'label': fld_2.units},rasterized=True)
+                    ax.coastlines()
+                    path, fname = os.path.split(f_2)
+                    parr = path.split(mod_2)
+                    title = parr[0]+mod_2+'\n'+parr[1]+'/\n'+fname+'\n'+fld_2.attrs['long_name']
+                    plt.title(title)
+                    val_str = ("min, max, mean = "+"{:.5e}".format(fld_2.min().data)+", "
+                        "{:.5e}".format(fld_2.max().data)+", "+"{:.5e}".format(fld_2.mean().data))
+                    ax.annotate(tim_2+' '+val_str,xy=(0,-0.25),xycoords='axes fraction')
+                    plt.title(title)
                     pp.savefig()
                 elif ndims==3:
                     fig = plt.figure(figsize=[8.5,11])
@@ -355,7 +424,6 @@ def main(inargs):
                     val_str = ("min, max, mean = "+"{:.5e}".format(fld_2.min().data)+", "
                             "{:.5e}".format(fld_2.max().data)+", "+"{:.5e}".format(fld_2.mean().data))
                     ax.annotate(tim_2+' '+val_str,xy=(0,-0.25),xycoords='axes fraction')
-                    fig.tight_layout(pad=6)
                     pp.savefig()
                 elif ndims==4:
                     fig = plt.figure(figsize=[8.5,11])
@@ -376,11 +444,10 @@ def main(inargs):
                     val_str = ("min, max, mean = "+"{:.5e}".format(fld_2.min().data)+", "
                             "{:.5e}".format(fld_2.max().data)+", "+"{:.5e}".format(fld_2.mean().data))
                     ax.annotate(tim_2+' '+val_str,xy=(0,-0.25),xycoords='axes fraction')
-                    fig.tight_layout(pad=6)
                     pp.savefig()
                 else:
                     fig = plt.figure(figsize=[8.5,11])
-                    ax = fig.add_subplot(211)
+                    ax = fig.add_subplot(212)
                     fld_2 = dat_2[var_2].isel(lat=0,lon=0,time=0)
                     subtit = ' (Lat/Lon=0/0)'
                     fld_2.plot(ax=ax,cbar_kwargs={'label': fld_2.units},rasterized=True)
@@ -391,7 +458,6 @@ def main(inargs):
                     val_str = ("min, max, mean = "+"{:.5e}".format(fld_2.min().data)+", "
                         "{:.5e}".format(fld_2.max().data)+", "+"{:.5e}".format(fld_2.mean().data))
                     ax.annotate(tim_2+' '+val_str,xy=(0,-0.2),xycoords='axes fraction')
-                    fig.tight_layout(pad=6)
                     pp.savefig()
 
     pp.close() # multipage document complete
