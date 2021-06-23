@@ -29,7 +29,7 @@ def main(inargs):
     if mod_1[0:7] == 'GISS-E2': # skip *fx* and *fy* variables
         dir_1_var = [i for i in dir_1_var if 'fx' not in i]
         dir_1_var = [i for i in dir_1_var if 'fy' not in i]
-        print('WARNING: Skipping fx class from E2 owing to dimensionality error.')
+        print('WARNING: Skipping *fx* and *fy* from E2 owing to potential dimensionality differences.')
     if inargs.include != None:
         dir_1_var_incl = []
         for i_1, d_1 in enumerate(inargs.include.split(',')): # iterate over comma-separated list
@@ -87,7 +87,7 @@ def main(inargs):
         if mod_2[0:7] == 'GISS-E2': # skip *fx* and *fy* variables
             dir_2_var = [i for i in dir_2_var if 'fx' not in i]
             dir_2_var = [i for i in dir_2_var if 'fy' not in i]
-            print('WARNING: Skipping fx class from E2 owing to dimensionality error.')
+            print('WARNING: Skipping *fx* and *fy* from E2 owing to potential dimensionality differences.')
         dir_2_var = [i for i in dir_2_var if 'fx' not in i]
         if inargs.include != None:
             dir_2_var_incl = []
