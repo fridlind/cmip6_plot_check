@@ -24,8 +24,11 @@ def main(inargs):
     dir_1_var = glob.glob(dir_1+'*/*/*', recursive=True) # identify all reported variables
     dir_1_var = [i for i in dir_1_var if 'fx' not in i]  # ignore *fx/ variables
     if inargs.include != None:
+        dir_1_var_incl = []
         for i_1, d_1 in enumerate(inargs.include.split(',')): # iterate over comma-separated list
-            dir_1_var = [i for i in dir_1_var if d_1 in i] # include only specified variable(s)
+            var_incl = [i for i in dir_1_var if d_1 in i] # include only specified variable(s)
+            dir_1_var_incl.extend(var_incl)
+        dir_1_var = list(dir_1_var_incl)
         if dir_1_var == []:
             print('DATA ERROR: First directory output is missing specified variable(s).')
             print(inargs.include)
@@ -72,8 +75,11 @@ def main(inargs):
         dir_2_var = glob.glob(dir_2+'*/*/*', recursive=True)
         dir_2_var = [i for i in dir_2_var if 'fx' not in i]
         if inargs.include != None:
+            dir_2_var_incl = []
             for i_2, d_2 in enumerate(inargs.include.split(',')): # iterate over comma-separated list
-                dir_2_var = [i for i in dir_2_var if d_2 in i] # include only specified variable(s)
+                var_incl = [i for i in dir_2_var if d_2 in i] # include only specified variable(s)
+                dir_2_var_incl.extend(var_incl)
+            dir_2_var = list(dir_2_var_incl)
             if dir_2_var == []:
                 print('DATA ERROR: Second directory output is missing specified variable(s).')
                 print(inargs.include)
