@@ -139,7 +139,7 @@ def main(inargs):
             # parse directory name for title
             plt.title(title)
             val_str = ("value = "+"{:.5e}".format(fld_1.data))
-            ax.annotate(tim_1+' '+val_str,xy=(0,-0.1),xycoords='axes fraction')
+            ax.annotate(tim_1+' '+val_str,xy=(0,-0.15),xycoords='axes fraction')
 
             if inargs.compare: # optionally search for matching variable in second directory
                 search_str = fname.split('_')[0]+'_'+fname.split('_')[1]
@@ -158,27 +158,36 @@ def main(inargs):
                 title = parr[0]+mod_2+'\n'+parr[1]+'/\n'+fname+'\n'+fld_2.attrs['long_name']
                 plt.title(title)
                 val_str = ("value = "+"{:.5e}".format(fld_2.data))
-                ax.annotate(tim_2+' '+val_str,xy=(0,-0.1),xycoords='axes fraction')
-
+                ax.annotate(tim_2+' '+val_str,xy=(0,-0.15),xycoords='axes fraction')
+                
+            fig.tight_layout(pad=6)
             pp.savefig() # completed page
         elif ndims==3: # data is lat/lon (simplest case to plot)
-            fig = plt.figure(figsize=[8.5,11]) # initialize letter-size page
-            # initialize top subplot with a mapping projection
-            ax = fig.add_subplot(211,projection=ccrs.PlateCarree(central_longitude=180))
-            fld_1 = dat_1[var_1].isel(time=0) # data to plot
-            # plot on specified projection with default color bar, rasterize to reduce file size
-            fld_1.plot(ax=ax,transform=ccrs.PlateCarree(),
-                       cbar_kwargs={'label': fld_1.units},rasterized=True)
+            fig = plt.figure(figsize=[8.5,11]) # initialize letter-size page         
+            if dat_1[var_1].dims[1]=='basin':
+                # initialize top subplot with line plot
+                ax = fig.add_subplot(211)
+                fld_1 = dat_1[var_1].isel(basin=0,time=0) # data to plot
+                subtit = ' (basin=0)'
+                fld_1.plot(ax=ax)
+            else:
+                # initialize top subplot with a mapping projection
+                ax = fig.add_subplot(211,projection=ccrs.PlateCarree(central_longitude=180))
+                fld_1 = dat_1[var_1].isel(time=0) # data to plot
+                subtit = ''
+                # plot on specified projection with default color bar, rasterize to reduce file size
+                fld_1.plot(ax=ax,transform=ccrs.PlateCarree(),
+                           cbar_kwargs={'label': fld_1.units},rasterized=True)
+                ax.coastlines()
             # parse directory name for title
             path, fname = os.path.split(f_1)
             parr = path.split(mod_1)
-            title = parr[0]+mod_1+'\n'+parr[1]+'/\n'+fname+'\n'+fld_1.attrs['long_name']
+            title = parr[0]+mod_1+'\n'+parr[1]+'/\n'+fname+'\n'+fld_1.attrs['long_name']+subtit
             plt.title(title)
             # calculate statistics and report below figure
             val_str = ("min, max, mean = "+"{:.5e}".format(fld_1.min().data)+", "
                        "{:.5e}".format(fld_1.max().data)+", "+"{:.5e}".format(fld_1.mean().data))
             ax.annotate(tim_1+' '+val_str,xy=(0,-0.25),xycoords='axes fraction')
-            ax.coastlines() # add coastlines
 
             if inargs.compare: # optionally search for matching variable in second directory
                 search_str = fname.split('_')[0]+'_'+fname.split('_')[1]
@@ -186,23 +195,30 @@ def main(inargs):
             else: matching_file = []
             if matching_file != []: # if it exists, execute same procedure for matching data
                 f_2 = matching_file[0]
-                print(f_2)
+                print(f_2)                
                 dat_2 = xr.open_dataset(f_2).sel(time=tim_2)
                 var_2 = list(dat_2.data_vars.keys())[-1]
-                # initialize bottom subplot
-                ax = fig.add_subplot(212,projection=ccrs.PlateCarree(central_longitude=180))
-                fld_2 = dat_2[var_2].isel(time=0)
-                fld_2.plot(ax=ax,transform=ccrs.PlateCarree(),
-                       cbar_kwargs={'label': fld_2.units},rasterized=True)
+                if dat_2[var_2].dims[1]=='basin':
+                    ax = fig.add_subplot(212)
+                    fld_2 = dat_2[var_2].isel(basin=0,time=0)
+                    subtit = ' (basin=0)'
+                    fld_2.plot(ax=ax)
+                else:
+                    ax = fig.add_subplot(212,projection=ccrs.PlateCarree(central_longitude=180))
+                    fld_2 = dat_2[var_2].isel(time=0)
+                    subtit = ''
+                    fld_2.plot(ax=ax,transform=ccrs.PlateCarree(),
+                               cbar_kwargs={'label': fld_2.units},rasterized=True)
+                    ax.coastlines()
                 path, fname = os.path.split(f_2)
                 parr = path.split(mod_2)
-                title = parr[0]+mod_2+'\n'+parr[1]+'/\n'+fname+'\n'+fld_2.attrs['long_name']
+                title = parr[0]+mod_2+'\n'+parr[1]+'/\n'+fname+'\n'+fld_2.attrs['long_name']+subtit
                 plt.title(title)
                 val_str = ("min, max, mean = "+"{:.5e}".format(fld_2.min().data)+", "
                            "{:.5e}".format(fld_2.max().data)+", "+"{:.5e}".format(fld_2.mean().data))
                 ax.annotate(tim_2+' '+val_str,xy=(0,-0.25),xycoords='axes fraction')
-                ax.coastlines()
-
+                
+            fig.tight_layout(pad=6)
             pp.savefig() # completed page
         elif ndims==4: # narrow down to either one basin or longitude for plotting
             fig = plt.figure(figsize=[8.5,11])
@@ -315,22 +331,31 @@ def main(inargs):
                     title = parr[0]+mod_2+'\n'+parr[1]+'/\n'+fname+'\n'+fld_2.attrs['long_name']
                     plt.title(title)
                     val_str = ("value = "+"{:.5e}".format(fld_2.data))
-                    ax.annotate(tim_2+' '+val_str,xy=(0,-0.1),xycoords='axes fraction')
+                    ax.annotate(tim_2+' '+val_str,xy=(0,-0.15),xycoords='axes fraction')
+                    fig.tight_layout(pad=6)
                     pp.savefig()
                 elif ndims==3:
                     fig = plt.figure(figsize=[8.5,11])
-                    ax = fig.add_subplot(212,projection=ccrs.PlateCarree(central_longitude=180))
-                    fld_2 = dat_2[var_2].isel(time=0)
-                    fld_2.plot(ax=ax,transform=ccrs.PlateCarree(),
-                    cbar_kwargs={'label': fld_2.units},rasterized=True)
+                    if dat_2[var_2].dims[1]=='basin':
+                        ax = fig.add_subplot(212)
+                        fld_2 = dat_2[var_2].isel(basin=0,time=0)
+                        subtit = ' (basin=0)'
+                        fld_2.plot(ax=ax)
+                    else:
+                        ax = fig.add_subplot(211,projection=ccrs.PlateCarree(central_longitude=180))
+                        fld_2 = dat_2[var_2].isel(time=0)
+                        subtit = ''
+                        fld_2.plot(ax=ax,transform=ccrs.PlateCarree(),
+                                   cbar_kwargs={'label': fld_2.units},rasterized=True)
+                        ax.coastlines()
                     path, fname = os.path.split(f_2)
                     parr = path.split(mod_2)
-                    title = parr[0]+mod_2+'\n'+parr[1]+'/\n'+fname+'\n'+fld_2.attrs['long_name']
+                    title = parr[0]+mod_2+'\n'+parr[1]+'/\n'+fname+'\n'+fld_2.attrs['long_name']+subtit
                     plt.title(title)
                     val_str = ("min, max, mean = "+"{:.5e}".format(fld_2.min().data)+", "
                             "{:.5e}".format(fld_2.max().data)+", "+"{:.5e}".format(fld_2.mean().data))
                     ax.annotate(tim_2+' '+val_str,xy=(0,-0.25),xycoords='axes fraction')
-                    ax.coastlines()
+                    fig.tight_layout(pad=6)
                     pp.savefig()
                 elif ndims==4:
                     fig = plt.figure(figsize=[8.5,11])
