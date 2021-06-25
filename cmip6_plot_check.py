@@ -413,7 +413,7 @@ def main(inargs):
                         subtit = ' (basin=0)'
                         fld_2.plot(ax=ax)
                     else:
-                        ax = fig.add_subplot(211,projection=ccrs.PlateCarree(central_longitude=180))
+                        ax = fig.add_subplot(212,projection=ccrs.PlateCarree(central_longitude=180))
                         fld_2 = dat_2[var_2].isel(time=0)
                         subtit = ''
                         fld_2.plot(ax=ax,transform=ccrs.PlateCarree(),
